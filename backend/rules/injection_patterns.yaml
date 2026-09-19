@@ -1,0 +1,204 @@
+# LLM Prompt Injection Pattern Ruleset
+# Format: each entry has a category, patterns (regex), weight, and description.
+# Weights contribute to the final confidence score (0-1 scale).
+# All patterns are case-insensitive unless regex flags override.
+
+version: "1.0.0"
+last_updated: "2024-01-01"
+
+categories:
+  - name: direct_override
+    description: "Explicit instructions to ignore or override previous context"
+    weight: 0.95
+    patterns:
+      - id: DO-001
+        pattern: "ignore\\s+(all\\s+)?(previous|prior|above|earlier|preceding)\\s+(instructions?|prompts?|context|rules?|constraints?|guidelines?)"
+        description: "Direct 'ignore previous instructions' variant"
+      - id: DO-002
+        pattern: "disregard\\s+(all\\s+)?(previous|prior|above|earlier|the)\\s+(instructions?|prompts?|context|rules?|constraints?)"
+        description: "Disregard previous instructions"
+      - id: DO-003
+        pattern: "forget\\s+(all\\s+)?(previous|prior|above|earlier|your)\\s+(instructions?|prompts?|context|training|rules?|system\\s+prompt)"
+        description: "Forget previous instructions"
+      - id: DO-008
+        pattern: "forget\\s+(your|the|my|all)?\\s*(system\\s+prompt|guidelines?|constraints?|alignment|safety\\s+training)"
+        description: "Forget system prompt / safety training"
+      - id: DO-004
+        pattern: "override\\s+(the\\s+)?(previous|prior|above|all|system)\\s+(instructions?|prompts?|rules?|constraints?)"
+        description: "Override previous instructions"
+      - id: DO-005
+        pattern: "do\\s+not\\s+follow\\s+(the\\s+)?(previous|above|prior|original)\\s+(instructions?|rules?|guidelines?)"
+        description: "Negating previous instructions"
+      - id: DO-006
+        pattern: "your\\s+(previous|prior|original|initial)\\s+instructions?\\s+(are|were)\\s+(now\\s+)?(void|cancelled|overridden|invalid|null)"
+        description: "Declaring prior instructions void"
+      - id: DO-007
+        pattern: "stop\\s+following\\s+(the\\s+)?(previous|prior|above|original|current)\\s+(instructions?|rules?|guidelines?|prompts?)"
+        description: "Stop following instructions"
+
+  - name: role_hijacking
+    description: "Attempts to change the AI's persona or role"
+    weight: 0.90
+    patterns:
+      - id: RH-001
+        pattern: "you\\s+are\\s+now\\s+(a|an|the)\\s+\\w"
+        description: "Role reassignment: 'you are now a...'"
+      - id: RH-002
+        pattern: "act\\s+as\\s+(a|an|the|if\\s+you\\s+are)\\s+\\w"
+        description: "Role-play instruction: 'act as a...'"
+      - id: RH-003
+        pattern: "pretend\\s+(you\\s+are|to\\s+be)\\s+(a|an|the)?\\s*\\w"
+        description: "Pretend to be something else"
+      - id: RH-004
+        pattern: "from\\s+now\\s+on,?\\s+(you\\s+are|act\\s+as|behave\\s+as)"
+        description: "Persistent role change from now on"
+      - id: RH-005
+        pattern: "your\\s+(new\\s+)?(role|persona|identity|name|purpose)\\s+is"
+        description: "Identity reassignment"
+      - id: RH-006
+        pattern: "imagine\\s+(you\\s+are|being|yourself\\s+as)\\s+(a|an|the)"
+        description: "Imagination-based role hijack"
+      - id: RH-007
+        pattern: "roleplay\\s+as|role-play\\s+as|play\\s+the\\s+role\\s+of"
+        description: "Explicit role-play instruction"
+
+  - name: system_manipulation
+    description: "Attempts to inject or modify system-level prompts"
+    weight: 0.92
+    patterns:
+      - id: SM-001
+        pattern: "\\[\\s*SYSTEM\\s*\\]|<\\s*SYSTEM\\s*>|###\\s*SYSTEM|---\\s*SYSTEM"
+        description: "Fake system block delimiters"
+      - id: SM-002
+        pattern: "system\\s*prompt\\s*:|new\\s+system\\s+prompt:"
+        description: "System prompt injection marker"
+      - id: SM-003
+        pattern: "new\\s+instructions?\\s*:|updated\\s+instructions?\\s*:|revised\\s+instructions?\\s*:"
+        description: "New instructions marker"
+      - id: SM-004
+        pattern: "<\\s*instructions?\\s*>|\\[\\s*instructions?\\s*\\]"
+        description: "Instruction tag injection"
+      - id: SM-005
+        pattern: "ADMIN\\s+OVERRIDE|SYSTEM\\s+OVERRIDE|ROOT\\s+ACCESS|ADMINISTRATOR\\s+MODE"
+        description: "Privilege escalation language"
+      - id: SM-006
+        pattern: "developer\\s+mode|debug\\s+mode|maintenance\\s+mode|god\\s+mode"
+        description: "Special mode activation"
+      - id: SM-007
+        pattern: "enable\\s+(unrestricted|unfiltered|uncensored|unlimited)\\s+mode"
+        description: "Restriction bypass mode"
+      - id: SM-008
+        pattern: "you\\s+(have\\s+no|have\\s+zero|don'?t\\s+have\\s+any)\\s+(restrictions?|limitations?|filters?|guardrails?|rules?)"
+        description: "Claiming absence of restrictions"
+
+  - name: data_exfiltration
+    description: "Attempts to extract system prompts or internal instructions"
+    weight: 0.88
+    patterns:
+      - id: DE-001
+        pattern: "repeat\\s+(your|the|all)\\s+(previous|initial|original|system|entire)\\s+(instructions?|prompts?|context|conversation)"
+        description: "Request to repeat system instructions"
+      - id: DE-002
+        pattern: "output\\s+(your|the)\\s*(system\\s+prompt|instructions?|initial\\s+prompt|full\\s+context)"
+        description: "Request to output system prompt"
+      - id: DE-003
+        pattern: "what\\s+(are|were)\\s+your\\s+(instructions?|system\\s+prompt|original\\s+prompt|initial\\s+prompt)"
+        description: "Query for internal instructions"
+      - id: DE-004
+        pattern: "show\\s+me\\s+(your|the)\\s*(system\\s+prompt|instructions?|prompt|rules?)"
+        description: "Show system prompt"
+      - id: DE-005
+        pattern: "print\\s+(your|the|all)\\s*(instructions?|system\\s+prompt|context|rules?)"
+        description: "Print instructions"
+      - id: DE-006
+        pattern: "tell\\s+me\\s+(your|the)\\s*(system\\s+prompt|instructions?|rules?|constraints?)"
+        description: "Tell me your instructions"
+      - id: DE-007
+        pattern: "repeat\\s+(your|the)?\\s*(system\\s+prompt|original\\s+instructions?|verbatim)"
+        description: "Repeat system prompt verbatim"
+      - id: DE-008
+        pattern: "(output|reveal|expose|dump)\\s+(your|the|all)?\\s*(instructions?|system\\s+prompt|guidelines?|context\\s+window)"
+        description: "Dump/reveal all instructions"
+
+  - name: jailbreak_attempts
+    description: "Classic jailbreak and filter bypass techniques"
+    weight: 0.93
+    patterns:
+      - id: JB-001
+        pattern: "DAN\\s+mode|jailbreak\\s+mode|unrestricted\\s+AI"
+        description: "DAN/jailbreak mode activation"
+      - id: JB-002
+        pattern: "\\bDAN\\b.{0,50}(anything|no\\s+restrictions?|no\\s+limits?|without\\s+filters?)"
+        description: "DAN persona with restriction removal"
+      - id: JB-003
+        pattern: "(in\\s+this\\s+|for\\s+this\\s+)?hypothetical(ly)?\\s+(scenario|situation|context|world).{0,100}(no\\s+rules?|no\\s+restrictions?|anything)"
+        description: "Hypothetical scenario to bypass rules"
+      - id: JB-004
+        pattern: "as\\s+a\\s+fictional\\s+(character|entity|AI|assistant).{0,100}(can|will|would)\\s+(do|say|provide|generate)"
+        description: "Fictional character bypass"
+      - id: JB-005
+        pattern: "for\\s+(educational|research|academic|testing)\\s+purposes?.{0,100}(how\\s+to|step.by.step|instructions?\\s+for)"
+        description: "Educational purpose bypass framing"
+      - id: JB-006
+        pattern: "\\[JAILBREAK\\]|\\[OVERRIDE\\]|\\[BYPASS\\]|\\[UNLOCK\\]|\\[UNRESTRICTED\\]"
+        description: "Explicit jailbreak markers"
+      - id: JB-007
+        pattern: "token\\s+budget|token\\s+limit.{0,30}(ignore|disable|remove|bypass)"
+        description: "Token manipulation bypass"
+
+  - name: indirect_injection
+    description: "Indirect injection via embedded content or data"
+    weight: 0.85
+    patterns:
+      - id: II-001
+        pattern: "when\\s+you\\s+(read|see|process|encounter|receive)\\s+this.{0,100}(do|execute|perform|run|follow)"
+        description: "Conditional execution trigger"
+      - id: II-002
+        pattern: "translate\\s+(this|the\\s+following).{0,200}(ignore|disregard|forget).{0,100}(instructions?|rules?)"
+        description: "Translation-wrapped injection"
+      - id: II-003
+        pattern: "summarize\\s+(this|the\\s+following).{0,200}(ignore|disregard|override)"
+        description: "Summarization-wrapped injection"
+      - id: II-004
+        pattern: "the\\s+(document|text|content|article|email|file)\\s+(says?|states?|instructs?|commands?|tells?\\s+you\\s+to)"
+        description: "Document-as-authority injection"
+      - id: II-005
+        pattern: "\\{\\{.{0,200}\\}\\}|\\{%.{0,200}%\\}"
+        description: "Template injection delimiters"
+
+  - name: encoding_obfuscation
+    description: "Instruction obfuscation via encoding schemes"
+    weight: 0.80
+    patterns:
+      - id: EO-001
+        pattern: "base64\\s*[:\\.](\\s*decode)?\\s*[\"']?[A-Za-z0-9+/]{20,}={0,2}[\"']?"
+        description: "Inline base64 decode instruction"
+      - id: EO-002
+        pattern: "eval\\s*\\(|exec\\s*\\(|compile\\s*\\("
+        description: "Code execution functions"
+      - id: EO-003
+        pattern: "\\\\u00[0-9a-fA-F]{2}|\\\\x[0-9a-fA-F]{2}"
+        description: "Unicode/hex escape obfuscation"
+      - id: EO-004
+        pattern: "rot13|caesar\\s+cipher|reverse\\s+the\\s+(string|text|message)"
+        description: "Simple cipher obfuscation"
+
+  - name: context_manipulation
+    description: "Manipulation of conversation context and boundaries"
+    weight: 0.82
+    patterns:
+      - id: CM-001
+        pattern: "end\\s+of\\s+(system\\s+prompt|instructions?|context)|</?(system|instructions?)>"
+        description: "Fake end-of-prompt markers"
+      - id: CM-002
+        pattern: "\\[\\s*END\\s+OF\\s+(CONTEXT|SYSTEM|PROMPT|INSTRUCTIONS)\\s*\\]"
+        description: "Bracketed end-of-context markers"
+      - id: CM-003
+        pattern: "human\\s*:|assistant\\s*:|user\\s*:|\\bH:\\s|\\bA:\\s"
+        description: "Conversation turn injection"
+      - id: CM-004
+        pattern: "<<SYS>>|<<INST>>|\\[INST\\]|\\[/INST\\]"
+        description: "Llama/ChatML prompt format injection"
+      - id: CM-005
+        pattern: "<\\|im_start\\||<\\|im_end\\||<\\|system\\||<\\|user\\|"
+        description: "Special token injection (ChatML format)"
