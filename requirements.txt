@@ -12,10 +12,8 @@ sqlalchemy==2.0.31
 aiosqlite==0.20.0
 
 # Detection — ML & NLP
+# Detection — ML & NLP (Lightweight mode for Vercel)
 scikit-learn==1.5.1
-transformers==4.41.2
-sentence-transformers==3.0.1
-torch==2.3.1
 numpy==1.26.4
 
 # Document parsing
